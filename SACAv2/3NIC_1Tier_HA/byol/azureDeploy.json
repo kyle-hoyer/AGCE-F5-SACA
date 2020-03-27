@@ -13,7 +13,6 @@
     },
         "parameters": {
         "adminUsername": {
-            "defaultValue": "xadmin",
             "metadata": {
                 "description": "User name for the Virtual Machine."
             },

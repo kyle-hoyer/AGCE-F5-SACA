@@ -2,23 +2,14 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-      "adminUsername": {
-          "value": "xadmin"
-      },
       "authenticationType": {
           "value": "password"
       },
-      "adminPasswordOrKey": {
-          "value": "2018F5@Networks!!"
-      },
-      "windowsAdminPassword": {
-          "value": "2018F5@Networks!!"
-      },
       "dnsLabel": {
-          "value": "f5dns014"
+          "value": "f5dns01"
       },
       "instanceName": {
-          "value": "bigip4"
+          "value": "bigip"
       },
       "numberOfExternalIps": {
           "value": 1
@@ -33,10 +24,7 @@
           "value": "3456"
       },
       "instanceType": {
-          "value": "Standard_DS3_v2"
-      },
-      "imageName": {
-          "value": "Best1Gbps"
+          "value": "Standard_DS4_v2"
       },
       "bigIpVersion": {
           "value": "14.1.200000"
@@ -44,26 +32,38 @@
       "bigIpModules": {
           "value": "ltm:nominal,asm:nominal,afm:nominal"
       },
+      "bigIqAddress": {
+          "value": "https://mjcbiq01.usgovvirginia.cloudapp.usgovcloudapi.net/ui/devices/license-management/licenses"
+      },
+      "bigIqLicensePoolName": {
+          "value": "Pool"
+      },
       "stigDevice": {
           "value": true
       },
       "northTrustedAddressStartIP": {
-          "value": "192.168.3.4"
+          "value": "10.1.3.4"
       },
       "northTrustedAddressSubnet": {
-          "value": "192.168.3.0/24"
+          "value": "10.1.3.0/24"
       },
       "northUntrustedAddressStartIP": {
-          "value": "192.168.2.4"
+          "value": "10.1.2.4"
       },
       "northUntrustedAddressSubnet": {
-          "value": "192.168.2.0/24"
+          "value": "10.1.2.0/24"
+      },
+      "ManagementAddressStartIP": {
+          "value": "10.1.4.4"
+      },
+      "ManagementAddressSubnet": {
+          "value": "10.1.4.0/24"
       },
       "vdmsAddressSubnet": {
-          "value": "192.168.4.0/24"
+          "value": "10.1.1.0/24"
       },
       "declarationUrl": {
-          "value": "https://raw.githubusercontent.com/Mikej81/f5-azure-saca/2.6.1/SACAv2/AS3/paygsccaBaseline.json"
+          "value": "https://raw.githubusercontent.com/f5devcentral/f5-azure-saca/master/SACAv2/AS3/sccaBaseline.json"
       },
       "ntpServer": {
           "value": "0.pool.ntp.org"
@@ -79,6 +79,7 @@
       },
       "tagValues": {
           "value": {
+              "project": "Walker",
               "application": "APP",
               "cost": "COST",
               "environment": "ENV",

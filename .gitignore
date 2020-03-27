@@ -4,3 +4,4 @@ media/
 pdf/*
 .vscode
 *.sublime-*
+**/SACA_Input.txt

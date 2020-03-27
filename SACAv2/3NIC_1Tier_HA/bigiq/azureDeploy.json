@@ -233,41 +233,49 @@
             },
             "type": "bool"
         },
-"NorthTrustedAddressStartIP": {
-            "defaultValue": "192.168.3.4",
+        "NorthTrustedAddressStartIP": {
             "metadata": {
                 "description": "The starting address of the IPs to be used for deployment. You MUST type the full IP Address '10.0.0.10', '10.100.0.40', '192.168.1.5'."
             },
             "type": "string"
         },
         "NorthTrustedAddressSubnet": {
-            "defaultValue": "192.168.3.0/24",
             "metadata": {
                 "description": "The CIDR block the BIG-IP VEs use when creating the North Trusted Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
             },
             "type": "string"
         },
         "NorthUntrustedAddressStartIP": {
-            "defaultValue": "192.168.2.4",
             "metadata": {
                 "description": "The starting address of the IPs to be used for deployment. You MUST type the full IP Address '10.0.0.10', '10.100.0.40', '192.168.1.5'."
             },
             "type": "string"
         },
         "NorthUntrustedAddressSubnet": {
-            "defaultValue": "192.168.2.0/24",
             "metadata": {
                 "description": "The CIDR block the BIG-IP VEs use when creating the North Untrusted Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
             },
             "type": "string"
         },
         "VDMSAddressSubnet": {
-            "defaultValue": "192.168.4.0/24",
             "metadata": {
                 "description": "The CIDR block the BIG-IP VEs use when creating the VDSS Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
             },
             "type": "string"
         },
+        "ManagementAddressStartIP":{
+            "metadata": {
+                "description": "The starting address of the IPs to be used for deployment. You MUST type the full IP Address '10.0.0.10', '10.100.0.40', '192.168.1.5'."
+            },
+            "type": "string"
+        },
+        "ManagementAddressSubnet": {
+            "metadata": {
+                "description": "The CIDR block the BIG-IP VEs use when creating the North Untrusted Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
+            },
+            "type": "string"
+        },
+
         "declarationUrl": {
             "defaultValue": "https://raw.githubusercontent.com/f5devcentral/f5-azure-saca/master/SACAv2/AS3/sccaBaseline.json",
             "metadata": {
@@ -366,7 +374,7 @@
         "computeApiVersion": "2017-12-01",
         "networkApiVersion": "2017-11-01",
         "storageApiVersion": "2017-10-01",
-                "dnsLabelPrefix": "[toLower(parameters('dnsLabel'))]",
+        "dnsLabelPrefix": "[toLower(parameters('dnsLabel'))]",
         "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
         "useCustomImage": "[not(empty(variables('customImage')))]",
         "isAcceleratedNetworkingSupported": "[if(not(contains(parameters('bigIpVersion'),  '14.1.200000')), bool('true'), bool('false'))]",
@@ -436,7 +444,7 @@
    
         "installCloudLibs64": "IyEvYmluL2Jhc2gKZWNobyAgYWJvdXQgdG8gZXhlY3V0ZQpjaGVja3M9MAp3aGlsZSBbICRjaGVja3MgLWx0IDEyMCBdOyBkbyBlY2hvIGNoZWNraW5nIG1jcGQKICAgIHRtc2ggLWEgc2hvdyBzeXMgbWNwLXN0YXRlIGZpZWxkLWZtdCB8IGdyZXAgLXEgcnVubmluZwogICBpZiBbICQ/ID09IDAgXTsgdGhlbgogICAgICAgZWNobyBtY3BkIHJlYWR5CiAgICAgICBicmVhawogICBmaQogICBlY2hvIG1jcGQgbm90IHJlYWR5IHlldAogICBsZXQgY2hlY2tzPWNoZWNrcysxCiAgIHNsZWVwIDEwCmRvbmUgCgplY2hvICBleHBhbmRpbmcgZjUtY2xvdWQtbGlicy50YXIuZ3oKdGFyIHh2ZnogL2NvbmZpZy9jbG91ZC9mNS1jbG91ZC1saWJzLnRhci5neiAtQyAvY29uZmlnL2Nsb3VkL2F6dXJlL25vZGVfbW9kdWxlcy9AZjVkZXZjZW50cmFsCmVjaG8gIGNsb3VkIGxpYnMgaW5zdGFsbCBjb21wbGV0ZQp0b3VjaCAvY29uZmlnL2Nsb3VkL2Nsb3VkTGlic1JlYWR5",
 
-"routeTableName": "BasicUDR",
+        "routeTableName": "BasicUDR",
         "routeCmd": "route",
         "stigCmdArray": {
             "true": "bash ./bigipstig.sh;",
@@ -515,20 +523,18 @@
         },
         "vdmsSubnetName": "VDMS",
         "publicIPAddressType": "Static",
-        "virtualNetworkName": "[concat(variables('dnsLabelPrefix'), '-scca-vnet')]",
+        "virtualNetworkName": "[concat(variables('dnsLabelPrefix'), '-saca-vnet')]",
 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
 
-        "ManagementAddressStartIP": "192.168.1.4",
-        "ManagementAddressSubnet": "192.168.1.0/24",
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]",
         "mgmtSubnetName": "management",
-        "mgmtSubnetPrivateAddress": "[variables('ManagementAddressStartIP')]",
+        "mgmtSubnetPrivateAddress": "[parameters('ManagementAddressStartIP')]",
         "mgmtSubnetPrivateAddress1": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 5))]",
         "mgmtSubnetPrivateAddress2": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 50))]",
         "mgmtSubnetPrivateAddress3": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 51))]",
-        "mgmtSubnetPrivateAddressPrefix": "[substring(variables('ManagementAddressStartIP'), 0, lastindexOf(variables('ManagementAddressStartIP'), '.'))]",
-        "mgmtSubnetStartDirty": "[substring(variables('ManagementAddressStartIP'), lastIndexOf(variables('ManagementAddressStartIP'), '.'), sub(length(variables('ManagementAddressStartIP')), lastIndexOf(variables('ManagementAddressStartIP'), '.') ))]",
+        "mgmtSubnetPrivateAddressPrefix": "[substring(parameters('ManagementAddressStartIP'), 0, lastindexOf(parameters('ManagementAddressStartIP'), '.'))]",
+        "mgmtSubnetStartDirty": "[substring(parameters('ManagementAddressStartIP'), lastIndexOf(parameters('ManagementAddressStartIP'), '.'), sub(length(parameters('ManagementAddressStartIP')), lastIndexOf(parameters('ManagementAddressStartIP'), '.') ))]",
         "mgmtSubnetStartInt": "[replace(variables('mgmtSubnetStartDirty'), '.','')]",
 
         "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]",
@@ -700,7 +706,7 @@
                     "addressPrefixes": [
                         "[parameters('NorthUntrustedAddressSubnet')]",
                         "[parameters('NorthTrustedAddressSubnet')]",
-                        "[variables('ManagementAddressSubnet')]",
+                        "[parameters('ManagementAddressSubnet')]",
                         "[parameters('VDMSAddressSubnet')]"
                     ]
                 },
@@ -708,7 +714,7 @@
                     {
                         "name": "[variables('mgmtSubnetName')]",
                         "properties": {
-                            "addressPrefix": "[variables('ManagementAddressSubnet')]"
+                            "addressPrefix": "[parameters('ManagementAddressSubnet')]"
                         }
                     },
                     {
