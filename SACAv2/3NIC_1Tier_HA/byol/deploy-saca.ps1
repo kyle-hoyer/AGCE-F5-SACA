@@ -6,7 +6,6 @@ $rgName = "$deploymentPrefix-rg"
 $rgLocation = 'East US'
 $environmentName = 'AzureCloud'
 $templateBasePath = 'C:\Github_Repos\f5-azure-saca\SACAv2\3NIC_1Tier_HA\byol'
-$authType = 'password' # Valid values are password or sshPublicKey
 $kvName = "$deploymentPrefix-kv"
 $sacaAdminSecret = 'saca-admin-username'
 $sacaAdminPwdSecret = 'saca-admin-password'
