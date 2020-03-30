@@ -33,7 +33,7 @@
           "value": "ltm:nominal,asm:nominal,afm:nominal"
       },
       "bigIqAddress": {
-          "value": "https://52.227.168.232/ui/devices/license-management/licenses"
+          "value": "52.227.168.232"
       },
       "bigIqLicensePoolName": {
           "value": "Pool"
