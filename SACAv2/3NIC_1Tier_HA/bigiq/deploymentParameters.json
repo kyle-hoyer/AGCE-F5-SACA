@@ -9,7 +9,7 @@
           "value": "f5dns01"
       },
       "instanceName": {
-          "value": "bigip"
+          "value": "age2e"
       },
       "numberOfExternalIps": {
           "value": 1
@@ -63,7 +63,7 @@
           "value": "10.1.1.0/24"
       },
       "declarationUrl": {
-          "value": "https://raw.githubusercontent.com/f5devcentral/f5-azure-saca/master/SACAv2/AS3/sccaBaseline.json"
+          "value": "https://github.com/Phydeauxman/f5-azure-saca/blob/master/SACAv2/AS3/paygsccaBaseline.json"
       },
       "ntpServer": {
           "value": "0.pool.ntp.org"
