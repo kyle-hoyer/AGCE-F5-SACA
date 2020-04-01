@@ -262,19 +262,6 @@
             },
             "type": "string"
         },
-        "ManagementAddressStartIP":{
-            "metadata": {
-                "description": "The starting address of the IPs to be used for deployment. You MUST type the full IP Address '10.0.0.10', '10.100.0.40', '192.168.1.5'."
-            },
-            "type": "string"
-        },
-        "ManagementAddressSubnet": {
-            "metadata": {
-                "description": "The CIDR block the BIG-IP VEs use when creating the North Untrusted Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
-            },
-            "type": "string"
-        },
-
         "declarationUrl": {
             "metadata": {
                 "description": "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
@@ -521,18 +508,20 @@
         },
         "vdmsSubnetName": "VDMS",
         "publicIPAddressType": "Static",
-        "virtualNetworkName": "[concat(variables('dnsLabelPrefix'), '-saca-vnet')]",
+        "virtualNetworkName": "[concat(variables('dnsLabelPrefix'), '-scca-vnet')]",
 
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
 
+        "ManagementAddressStartIP": "10.1.4.4",
+        "ManagementAddressSubnet": "10.1.4.0/24",
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]",
         "mgmtSubnetName": "management",
-        "mgmtSubnetPrivateAddress": "[parameters('ManagementAddressStartIP')]",
+        "mgmtSubnetPrivateAddress": "[variables('ManagementAddressStartIP')]",
         "mgmtSubnetPrivateAddress1": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 5))]",
         "mgmtSubnetPrivateAddress2": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 50))]",
         "mgmtSubnetPrivateAddress3": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 51))]",
-        "mgmtSubnetPrivateAddressPrefix": "[substring(parameters('ManagementAddressStartIP'), 0, lastindexOf(parameters('ManagementAddressStartIP'), '.'))]",
-        "mgmtSubnetStartDirty": "[substring(parameters('ManagementAddressStartIP'), lastIndexOf(parameters('ManagementAddressStartIP'), '.'), sub(length(parameters('ManagementAddressStartIP')), lastIndexOf(parameters('ManagementAddressStartIP'), '.') ))]",
+        "mgmtSubnetPrivateAddressPrefix": "[substring(variables('ManagementAddressStartIP'), 0, lastindexOf(variables('ManagementAddressStartIP'), '.'))]",
+        "mgmtSubnetStartDirty": "[substring(variables('ManagementAddressStartIP'), lastIndexOf(variables('ManagementAddressStartIP'), '.'), sub(length(variables('ManagementAddressStartIP')), lastIndexOf(variables('ManagementAddressStartIP'), '.') ))]",
         "mgmtSubnetStartInt": "[replace(variables('mgmtSubnetStartDirty'), '.','')]",
 
         "mgmtPublicIPAddressName": "[concat(variables('dnsLabel'), '-mgmt-pip')]",
@@ -704,7 +693,7 @@
                     "addressPrefixes": [
                         "[parameters('NorthUntrustedAddressSubnet')]",
                         "[parameters('NorthTrustedAddressSubnet')]",
-                        "[parameters('ManagementAddressSubnet')]",
+                        "[variables('ManagementAddressSubnet')]",
                         "[parameters('VDMSAddressSubnet')]"
                     ]
                 },
@@ -712,7 +701,7 @@
                     {
                         "name": "[variables('mgmtSubnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('ManagementAddressSubnet')]"
+                            "addressPrefix": "[variables('ManagementAddressSubnet')]"
                         }
                     },
                     {
@@ -1626,7 +1615,8 @@
         {
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]",
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0')]"
             ],
             "location": "[variables('location')]",
             "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1/start')]",

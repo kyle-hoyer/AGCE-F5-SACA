@@ -53,17 +53,11 @@
       "northUntrustedAddressSubnet": {
           "value": "10.1.2.0/24"
       },
-      "ManagementAddressStartIP": {
-          "value": "10.1.4.4"
-      },
-      "ManagementAddressSubnet": {
-          "value": "10.1.4.0/24"
-      },
       "vdmsAddressSubnet": {
           "value": "10.1.1.0/24"
       },
       "declarationUrl": {
-          "value": "https://github.com/Phydeauxman/f5-azure-saca/blob/master/SACAv2/AS3/paygsccaBaseline.json"
+          "value": "https://raw.githubusercontent.com/Phydeauxman/f5-azure-saca/master/SACAv2/AS3/paygsccaBaseline.json"
       },
       "ntpServer": {
           "value": "0.pool.ntp.org"
