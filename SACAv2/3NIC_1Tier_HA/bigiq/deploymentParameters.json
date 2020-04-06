@@ -2,87 +2,93 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+      "allowUsageAnalytics": {
+        "value": "Yes"
+      },
       "authenticationType": {
-          "value": "password"
+        "value": "password"
       },
-      "dnsLabel": {
-          "value": "f5dns01"
+      "bigIpModules": {
+        "value": "ltm:nominal,asm:nominal,afm:nominal"
       },
-      "instanceName": {
-          "value": "age2e"
+      "bigIpVersion": {
+        "value": "14.1.200000"
       },
-      "numberOfExternalIps": {
-          "value": 1
+      "bigIqAddress": {
+        "value": "52.227.168.232"
+      },
+      "bigIqLicensePoolName": {
+        "value": "Pool"
+      },
+      "customImage": {
+        "value": "OPTIONAL"
+      },
+      "declarationUrl": {
+        "value": "https://raw.githubusercontent.com/Phydeauxman/f5-azure-saca/master/SACAv2/AS3/paygsccaBaseline.json"
       },
       "enableNetworkFailover": {
-          "value": "Yes"
+        "value": "Yes"
       },
-      "internalLoadBalancerType": {
-          "value": "Per-protocol"
+      "gatewayAddressSubnet": {
+        "value": "10.3.0.0/24"
+      },
+      "instanceName": {
+        "value": "age2etst"
+      },
+      "instanceType": {
+        "value": "Standard_DS4_v2"
       },
       "internalLoadBalancerProbePort": {
           "value": "3456"
       },
-      "instanceType": {
-          "value": "Standard_DS4_v2"
+      "internalLoadBalancerType": {
+        "value": "Per-protocol"
       },
-      "bigIpVersion": {
-          "value": "14.1.200000"
+      "managementAddressSubnet": {
+        "value": "10.3.4.0/24"
       },
-      "bigIpModules": {
-          "value": "ltm:nominal,asm:nominal,afm:nominal"
+      "managementAddressStartIP": {
+        "value": "10.3.4.4"
       },
-      "bigIqAddress": {
-          "value": "52.227.168.232"
+      "northTrustedAddressStartIP": {
+        "value": "10.3.3.4"
       },
-      "bigIqLicensePoolName": {
-          "value": "Pool"
+      "northTrustedAddressSubnet": {
+        "value": "10.3.3.0/24"
+      },
+      "northUntrustedAddressStartIP": {
+        "value": "10.3.2.4"
+      },
+      "northUntrustedAddressSubnet": {
+        "value": "10.3.2.0/24"
+      },
+      "ntpServer": {
+        "value": "0.pool.ntp.org"
+      },
+      "numberOfExternalIps": {
+        "value": 1
+      },
+      "restrictedSrcAddress": {
+        "value": "*"
       },
       "stigDevice": {
           "value": true
       },
-      "northTrustedAddressStartIP": {
-          "value": "10.1.3.4"
-      },
-      "northTrustedAddressSubnet": {
-          "value": "10.1.3.0/24"
-      },
-      "northUntrustedAddressStartIP": {
-          "value": "10.1.2.4"
-      },
-      "northUntrustedAddressSubnet": {
-          "value": "10.1.2.0/24"
-      },
-      "vdmsAddressSubnet": {
-          "value": "10.1.1.0/24"
-      },
-      "declarationUrl": {
-          "value": "https://raw.githubusercontent.com/Phydeauxman/f5-azure-saca/master/SACAv2/AS3/paygsccaBaseline.json"
-      },
-      "ntpServer": {
-          "value": "0.pool.ntp.org"
+      "tagValues": {
+        "value": {
+            "project": "WALKER",
+            "application": "APP",
+            "cost": "COST",
+            "environment": "ENV",
+            "group": "GROUP",
+            "owner": "OWNER"
+        }
       },
       "timeZone": {
-          "value": "UTC"
+        "value": "UTC"
       },
-      "customImage": {
-          "value": "OPTIONAL"
-      },
-      "restrictedSrcAddress": {
-          "value": "*"
-      },
-      "tagValues": {
-          "value": {
-              "project": "WALKER",
-              "application": "APP",
-              "cost": "COST",
-              "environment": "ENV",
-              "group": "GROUP",
-              "owner": "OWNER"
-          }
-      },
-      "allowUsageAnalytics": {
-          "value": "Yes"
+      "vdmsAddressSubnet": {
+          "value": "10.3.1.0/24"
       }
   }
 }

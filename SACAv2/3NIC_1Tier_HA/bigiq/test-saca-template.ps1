@@ -1,16 +1,40 @@
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$tenantId,
+    [Parameter(Mandatory=$true)]
+    [string]$subscriptionId,
+    [Parameter(Mandatory=$true)]
+    [string]$deploymentPrefix,
+    [Parameter(Mandatory=$true)]
+    [string]$location,
+    [Parameter(Mandatory=$true)]
+    [string]$instanceName
+    )
+
+# Function generate random password as a SecureString
+Function New-RandomComplexPassword ($length=16)
+{
+    $Assembly = Add-Type -AssemblyName System.Web
+    $pwd = [System.Web.Security.Membership]::GeneratePassword($length,2)
+    $badchars = @{"(" = "~" ; ")" = "@" ; ";" = "#" ; "!" = "%" ; "|" = "^" ; "$" = "*" ; `
+                "<" = "Q" ; ">" = "s" ; "&" = "2" ; "'" = "N" ; "`"" = "K" ; "``" = "]" ; `
+                "\" = "l" ; "{" = "F" ; "}" = "g"}
+    foreach ($char in $badchars.keys) {$pwd = $pwd.replace($char,$badchars[$char])}
+    $SecureStringPassword = ConvertTo-SecureString -String $pwd -AsPlainText -Force
+    Return $SecureStringPassword
+}
+
 # Variables
-$tenantId = '4f534499-b9d1-4872-8b22-47fb237c1609'
-$subscriptionId = '54d3d134-5246-418a-b167-9c8c86a7c44d'
-$deploymentPrefix = 'east-saca'
 $rgName = "$deploymentPrefix-rg"
-$rgLocation = 'East US'
 $environmentName = 'AzureCloud'
-$templateBasePath = 'C:\Github_Repos\f5-azure-saca\SACAv2\3NIC_1Tier_HA\bigiq'
 $kvName = "$deploymentPrefix-kv"
 $sacaAdminSecret = 'saca-admin-username'
 $sacaAdminPwdSecret = 'saca-admin-password'
 $f5BigIqUsernameSecret = 'f5-bigiq-username'
 $f5BigIqPwdSecret = 'f5-bigiq-password'
+$deploymentName = $deploymentPrefix + "_" + (Get-Date -Format HHmmMMddyyyy)
+$pubName = 'f5-networks'
+$offerName = 'f5-big-ip-byol'
 
 # Login to Azure
 Write-Host "Checking context...";
@@ -29,12 +53,51 @@ else{
   Login-AzAccount -EnvironmentName $environmentName -TenantId $tenantId -Subscription $subscriptionId
   }
 
+# Accept license terms
+$skus = Get-AzVMImageSku `
+    -Location $location `
+    -PublisherName $pubName `
+    -Offer $offerName
+
+foreach($sku in $skus)
+    {
+        $terms = Get-AzMarketplaceTerms `
+            -Publisher $pubName `
+            -Product $sku.offer `
+            -Name $sku.skus
+        
+        if(!($terms.Accepted))
+            {
+                $terms | Set-AzMarketplaceTerms -Accept
+            }
+    }
+
+# Validate region value entered
+$regions = @(get-azlocation | Select-Object -ExpandProperty Location)
+if(!($regions.Contains($location)))
+    {
+        Do
+            {
+                Write-Host ""
+                Write-Host "$location is not a valid region" -ForegroundColor Red
+                Write-Host "Please enter one of the regions from the following list of valid regions:" -ForegroundColor Green
+                foreach($region in $regions)
+                    {
+                        Write-Host $region -ForegroundColor Yellow
+                    }
+                Write-Host ""
+                $location = Read-Host "Target Region"
+            }
+        Until
+            ($regions.Contains($location))
+    }
+
 # Create Resource Group
-$rg = Get-AzResourceGroup -Name $rgName -Location $rgLocation -ErrorAction Ignore
+$rg = Get-AzResourceGroup -Name $rgName -Location $location -ErrorAction Ignore
 if($null -eq $rg)
     {
         Write-Host "Creating Resource Group $rgName..."
-        $rg = New-AzResourceGroup -Name $rgName -Location $rgLocation
+        $rg = New-AzResourceGroup -Name $rgName -Location $location
     }
 else
     {
@@ -42,24 +105,42 @@ else
     }
 
 # Grab secrets from Key Vault
-if($null -eq (Get-AzKeyVault -VaultName $kvName -ErrorAction Ignore))
+$kv = Get-AzKeyVault -VaultName $kvName -ErrorAction Ignore
+if($null -eq $kv)
     {
-      Throw "The Key Vault $kvName does not exist"
+      Write-Host "Creating Key Vault with name $kvName" -ForegroundColor Green
+      $kv = New-AzKeyVault -Name $kvName `
+            -ResourceGroupName $rg.ResourceGroupName `
+            -Location $rg.Location `
+            -EnableSoftDelete `
+            -EnabledForDeployment `
+            -EnabledForTemplateDeployment
+      $adminUsername = ConvertTo-SecureString (Read-Host "Enter name of Admin User for Windows and Linux VMs") -AsPlainText -Force
+      $adminUserPwd = New-RandomComplexPassword
+      $f5BigIqUsername = ConvertTo-SecureString (Read-Host "Enter name of BIG-IQ Admin User") -AsPlainText -Force
+      $f5BigIqPwd = ConvertTo-SecureString (Read-Host "Enter the password for the BIG-IQ Admin User") -AsPlainText -Force
+      Set-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminSecret -SecretValue $adminUsername
+      Set-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqUsernameSecret -SecretValue $f5BigIqUsername
+      Set-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminPwdSecret -SecretValue $adminUserPwd
+      Set-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqPwdSecret -SecretValue $f5BigIqPwd
     }
-
-$adminUsername = (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminSecret).SecretValueText
-$adminPassword = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminPwdSecret).SecretValueText -AsPlainText -Force
-$f5BigIqUsername = (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqUsernameSecret).SecretValueText
-$f5BigIqPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqPwdSecret).SecretValueText -AsPlainText -Force
+else
+    {
+      $adminUsername = (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminSecret).SecretValueText
+      $adminUserPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminPwdSecret).SecretValueText -AsPlainText -Force
+      $f5BigIqUsername = (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqUsernameSecret).SecretValueText
+      $f5BigIqPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqPwdSecret).SecretValueText -AsPlainText -Force
+    }
 
 # Test template
 Test-AzResourceGroupDeployment -ResourceGroupName $rgName `
-    -TemplateFile "$templateBasePath\azureDeploy.json" `
-    -TemplateParameterFile "$templateBasePath\deploymentParameters.json" `
+    -TemplateFile "$PSScriptRoot\azureDeploy.json" `
+    -TemplateParameterFile "$PSScriptRoot\deploymentParameters.json" `
+    -adminPasswordOrKey $adminUserPwd `
     -adminUsername $adminUsername `
-    -adminPasswordOrKey $adminPassword `
-    -WindowsAdminPassword $adminPassword `
-    -bigIqUsername $f5BigIqUsername `
     -bigIqPassword $f5BigIqPwd `
+    -bigIqUsername $f5BigIqUsername `
+    -instanceName $instanceName `
+    -WindowsAdminPassword $adminUserPwd `
     -Mode Incremental `
     -Verbose
