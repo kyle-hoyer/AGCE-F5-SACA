@@ -2,83 +2,86 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+      "allowUsageAnalytics": {
+        "value": "Yes"
+      },
       "authenticationType": {
-          "value": "password"
-      },
-      "dnsLabel": {
-          "value": "f5dns014"
-      },
-      "instanceName": {
-          "value": "bigip4"
-      },
-      "numberOfExternalIps": {
-          "value": 1
-      },
-      "enableNetworkFailover": {
-          "value": "Yes"
-      },
-      "internalLoadBalancerType": {
-          "value": "Per-protocol"
-      },
-      "internalLoadBalancerProbePort": {
-          "value": "3456"
-      },
-      "instanceType": {
-          "value": "Standard_DS3_v2"
-      },
-      "imageName": {
-          "value": "Best1Gbps"
-      },
-      "bigIpVersion": {
-          "value": "14.1.200000"
+        "value": "password"
       },
       "bigIpModules": {
-          "value": "ltm:nominal,asm:nominal,afm:nominal"
+        "value": "ltm:nominal,asm:nominal,afm:nominal"
       },
-      "stigDevice": {
-          "value": true
-      },
-      "northTrustedAddressStartIP": {
-          "value": "192.168.3.4"
-      },
-      "northTrustedAddressSubnet": {
-          "value": "192.168.3.0/24"
-      },
-      "northUntrustedAddressStartIP": {
-          "value": "192.168.2.4"
-      },
-      "northUntrustedAddressSubnet": {
-          "value": "192.168.2.0/24"
-      },
-      "vdmsAddressSubnet": {
-          "value": "192.168.4.0/24"
-      },
-      "declarationUrl": {
-          "value": "https://raw.githubusercontent.com/Mikej81/f5-azure-saca/2.6.1/SACAv2/AS3/paygsccaBaseline.json"
-      },
-      "ntpServer": {
-          "value": "0.pool.ntp.org"
-      },
-      "timeZone": {
-          "value": "UTC"
+      "bigIpVersion": {
+        "value": "14.1.200000"
       },
       "customImage": {
-          "value": "OPTIONAL"
+        "value": "OPTIONAL"
+      },
+      "declarationUrl": {
+        "value": "https://raw.githubusercontent.com/Mikej81/f5-azure-saca/2.6.1/SACAv2/AS3/paygsccaBaseline.json"
+      },
+      "enableNetworkFailover": {
+        "value": "Yes"
+      },
+      "gatewayAddressSubnet": {
+        "value": "192.168.0.0/24"
+      },
+      "instanceName": {
+        "value": "age2etst"
+      },
+      "instanceType": {
+        "value": "Standard_DS4_v2"
+      },
+      "internalLoadBalancerProbePort": {
+        "value": "3456"
+      },
+      "internalLoadBalancerType": {
+        "value": "Per-protocol"
+      },
+      "managementAddressSubnet": {
+        "value": "192.168.4.0/24"
+      },
+      "managementAddressStartIP": {
+        "value": "192.168.4.4"
+      },
+      "northTrustedAddressStartIP": {
+        "value": "192.168.3.4"
+      },
+      "northTrustedAddressSubnet": {
+        "value": "192.168.3.0/24"
+      },
+      "northUntrustedAddressStartIP": {
+        "value": "192.168.2.4"
+      },
+      "northUntrustedAddressSubnet": {
+        "value": "192.168.2.0/24"
+      },
+      "ntpServer": {
+        "value": "0.pool.ntp.org"
+      },
+      "numberOfExternalIps": {
+        "value": 1
       },
       "restrictedSrcAddress": {
-          "value": "*"
+        "value": "*"
+      },
+      "stigDevice": {
+        "value": true
       },
       "tagValues": {
-          "value": {
-              "application": "APP",
-              "cost": "COST",
-              "environment": "ENV",
-              "group": "GROUP",
-              "owner": "OWNER"
-          }
+        "value": {
+            "application": "APP",
+            "cost": "COST",
+            "environment": "ENV",
+            "group": "GROUP",
+            "owner": "OWNER"
+        }
       },
-      "allowUsageAnalytics": {
-          "value": "Yes"
+      "timeZone": {
+        "value": "UTC"
+      },
+      "vdmsAddressSubnet": {
+        "value": "192.168.4.0/24"
       }
   }
 }

@@ -72,11 +72,10 @@
         "value": "*"
       },
       "stigDevice": {
-          "value": true
+        "value": true
       },
       "tagValues": {
         "value": {
-            "project": "WALKER",
             "application": "APP",
             "cost": "COST",
             "environment": "ENV",

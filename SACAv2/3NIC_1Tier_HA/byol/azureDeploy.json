@@ -1,16 +1,6 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "7.2.0.0",
-    "outputs": {
-        "RDP-URL": {
-            "type": "string",
-            "value": "[concat('rdp://',reference(concat(variables('extPublicIPAddressNamePrefix'), '0')).dnsSettings.fqdn)]"
-        },
-        "SSH-URL": {
-            "type": "string",
-            "value": "[concat('ssh://', parameters('adminUsername'), '@', reference(concat(variables('extPublicIPAddressNamePrefix'), '0')).dnsSettings.fqdn)]"
-        }
-    },
     "parameters": {
         "adminPasswordOrKey": {
             "metadata": {
@@ -73,16 +63,8 @@
             "type": "string"
         },
         "declarationUrl": {
-            "defaultValue": "https://raw.githubusercontent.com/f5devcentral/f5-azure-saca/master/SACAv2/AS3/sccaBaseline.json",
             "metadata": {
                 "description": "URL for the AS3 (https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/3.5.1/) declaration JSON file to be deployed. Leave as **NOT_SPECIFIED** to deploy without a service configuration."
-            },
-            "type": "string"
-        },
-        "dnsLabel": {
-            "defaultValue": "f5dns01",
-            "metadata": {
-                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
             },
             "type": "string"
         },
@@ -97,29 +79,27 @@
             },
             "type": "string"
         },
+        "gatewayAddressSubnet": {
+            "metadata": {
+                "description": "The CIDR block for the Virtual Network Gateway .  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
+            },
+            "type": "string"
+        },
+        "imageName": {
+            "allowedValues": [
+                "LTMTwoBootLocations",
+                "AllTwoBootLocations"
+            ],
+            "defaultValue": "AllTwoBootLocations",
+            "metadata": {
+                "description": "F5 SKU (image) you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+            },
+            "type": "string"
+        },
         "instanceName": {
             "defaultValue": "bigip",
             "metadata": {
                 "description": "Name of the Virtual Machine."
-            },
-            "type": "string"
-        },
-        "internalLoadBalancerType": {
-            "allowedValues": [
-                "Per-protocol",
-                "All-protocol",
-                "DO_NOT_USE"
-            ],
-            "defaultValue": "Per-protocol",
-            "metadata": {
-                "description": "Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**."
-            },
-            "type": "string"
-        },
-        "internalLoadBalancerProbePort": {
-            "defaultValue": "3456",
-            "metadata": {
-                "description": "Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect."
             },
             "type": "string"
         },
@@ -176,54 +156,68 @@
             },
             "type": "string"
         },
-        "imageName": {
-            "allowedValues": [
-                "LTMTwoBootLocations",
-                "AllTwoBootLocations"
-            ],
-            "defaultValue": "AllTwoBootLocations",
+        "internalLoadBalancerProbePort": {
+            "defaultValue": "3456",
             "metadata": {
-                "description": "F5 SKU (image) you want to deploy. Note: The disk size of the VM will be determined based on the option you select.  **Important**: If intending to provision multiple modules, ensure the appropriate value is selected, such as ****AllTwoBootLocations or AllOneBootLocation****."
+                "description": "Specify a TCP port for the internal load balancer to monitor. If you specified DO_NOT_USE for internal load balancer type, this setting has no effect."
+            },
+            "type": "string"
+        },
+        "internalLoadBalancerType": {
+            "allowedValues": [
+                "Per-protocol",
+                "All-protocol",
+                "DO_NOT_USE"
+            ],
+            "defaultValue": "Per-protocol",
+            "metadata": {
+                "description": "Specify a the type of internal Azure load balancer to deploy. Note: As of the initial release of this template, the all-protocol Azure load balancer is in public preview. Please ensure that this feature is enabled before selecting **All-protocol**."
             },
             "type": "string"
         },
         "licenseKey1": {
-            "defaultValue": "",
             "metadata": {
                 "description": "The license token for the F5 BIG-IP VE (BYOL)."
             },
             "type": "string"
         },
         "licenseKey2": {
-            "defaultValue": "",
             "metadata": {
                 "description": "The license token for the F5 BIG-IP VE (BYOL). This field is required when deploying two or more devices."
             },
             "type": "string"
         },
+        "managementAddressSubnet": {
+            "metadata": {
+                "description": "The CIDR block the BIG-IP VEs use when creating the Management Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
+            },
+            "type": "string"
+        },
+        "managementAddressStartIP": {
+            "metadata": {
+                "description": "The starting address of the IPs to be used for deployment. You MUST type the full IP Address '10.0.0.10', '10.100.0.40', '192.168.1.5'."
+            },
+            "type": "string"
+        },
         "NorthTrustedAddressStartIP": {
-            "defaultValue": "192.168.3.4",
             "metadata": {
                 "description": "The starting address of the IPs to be used for deployment. You MUST type the full IP Address '10.0.0.10', '10.100.0.40', '192.168.1.5'."
             },
             "type": "string"
         },
         "NorthTrustedAddressSubnet": {
-            "defaultValue": "192.168.3.0/24",
             "metadata": {
                 "description": "The CIDR block the BIG-IP VEs use when creating the North Trusted Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
             },
             "type": "string"
         },
         "NorthUntrustedAddressStartIP": {
-            "defaultValue": "192.168.2.4",
             "metadata": {
                 "description": "The starting address of the IPs to be used for deployment. You MUST type the full IP Address '10.0.0.10', '10.100.0.40', '192.168.1.5'."
             },
             "type": "string"
         },
         "NorthUntrustedAddressSubnet": {
-            "defaultValue": "192.168.2.0/24",
             "metadata": {
                 "description": "The CIDR block the BIG-IP VEs use when creating the North Untrusted Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
             },
@@ -266,6 +260,13 @@
             },
             "type": "int"
         },
+        "resourcePrefix": {
+            "defaultValue": "f5saca",
+            "metadata": {
+                "description": "Prefix used as part of resource naming"
+            },
+            "type": "string"
+        },
         "restrictedSrcAddress": {
             "defaultValue": "*",
             "metadata": {
@@ -301,7 +302,6 @@
             "type": "string"
         },
         "VDMSAddressSubnet": {
-            "defaultValue": "192.168.4.0/24",
             "metadata": {
                 "description": "The CIDR block the BIG-IP VEs use when creating the VDSS Subnet.  You MUST type the full CIDR address, for example '10.0.0.0/24', '10.100.0.0/16', '192.168.0.0/24'."
             },
@@ -330,9 +330,9 @@
         "availabilitySetId": {
             "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
         },
-        "availabilitySetName": "[concat(variables('dnsLabelPrefix'), '-avset')]",
-        "availabilitySet2Name": "[concat(variables('dnsLabelPrefix'), '-avset2')]",
-        "availabilitySet3Name": "[concat(variables('dnsLabelPrefix'), '-avset3')]",
+        "availabilitySetName": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-avset')]",
+        "availabilitySet2Name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-avset2')]",
+        "availabilitySet3Name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-avset3')]",
         "backEndAddressPoolArray": [
             {
                 "id": "[concat(variables('extLbId'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
@@ -394,15 +394,14 @@
         "customConfig": "### START (INPUT) CUSTOM CONFIGURATION HERE\n",
         "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
         "dataStorageAccountType": "Standard_LRS",
-        "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('dnsLabel'))]",
-        "dnsLabel": "[toLower(variables('dnsLabelPrefix'))]",
-        "dnsLabelPrefix": "[toLower(parameters('dnsLabel'))]",
-        "externalLoadBalancerName": "[concat(variables('dnsLabelPrefix'),'-ext-alb')]",
+        "deploymentId": "[concat(variables('subscriptionId'), resourceGroup().id, deployment().name, variables('resourcePrefix'))]",
+        "dnsHostnamePrefix": "[toLower(concat(parameters('resourcePrefix'),take(uniqueString(deployment().name),4)))]",
+        "externalLoadBalancerName": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-ext-alb')]",
         "extLbId": "[resourceId('Microsoft.Network/loadBalancers',variables('externalLoadBalancerName'))]",
-        "extNicName": "[concat(variables('dnsLabelPrefix'), '-ext')]",
-        "extNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabelPrefix'),'-ext-nsg'))]",
+        "extNicName": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-ext')]",
+        "extNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-ext-nsg'))]",
         "extPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('extPublicIPAddressNamePrefix'))]",
-        "extpublicIPAddressNamePrefix": "[concat(variables('dnsLabelPrefix'), '-ext-pip')]",
+        "extPublicIPAddressNamePrefix": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-ext-pip')]",
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extsubnetName'))]",
         "extSubnetName": "external",
         "extSubnetPrivateAddress": "[parameters('NorthUntrustedAddressStartIP')]",
@@ -425,9 +424,10 @@
             }
         },
         "failovertagValues": {
-            "f5_cloud_failover_label": "scca",
+            "f5_cloud_failover_label": "saca",
             "f5_cloud_failover_nic_map": "external"
-        },        "firewallConfig": "[concat(variables('cmdcreateFWLog'), variables('cmdcreateFWPolicy'))]",
+        },        
+        "firewallConfig": "[concat(variables('cmdcreateFWLog'), variables('cmdcreateFWPolicy'))]",
         "imageNameArray": {
             "15.0.100000": {
                 "AllOneBootLocation": "big-all-1slot",
@@ -472,18 +472,18 @@
         "installDODRootCA": "unzip Certificates_PKCS7_v5.5_DoD.zip; openssl pkcs7 -print_certs -in ./Certificates_PKCS7_v5.5_DoD/Certificates_PKCS7_v5.5_DoD.pem.p7b -out DoD_Root_CA.cer; tmsh install sys crypto cert DODRoots from-local-file DoD_Root_CA.cer;",
         "instanceName": "[toLower(parameters('instanceName'))]",
         "internalLoadBalancerAddress": "[concat(variables('intSubnetPrivateAddressPrefix'), '.', add(int(variables('IntSubnetStartInt')), 65))]",
-        "internalLoadBalancerName": "[concat(variables('dnsLabel'),'-int-ilb')]",
+        "internalLoadBalancerName": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-int-ilb')]",
         "intLbId": "[resourceId('Microsoft.Network/loadBalancers',variables('internalLoadBalancerName'))]",
-        "intNicName": "[concat(variables('dnsLabelPrefix'), '-int')]",
+        "intNicName": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-int')]",
         "installCustomConfig": "[concat(variables('singleQuote'), '#!/bin/bash\n', variables('customConfig'), variables('singleQuote'))]",
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]",
         "intSubnetName": "internal",
-        "intSubnetPrivateAddress": "[parameters('NorthTrustedAddressStartIP')]",
+        "intSubnetPrivateAddress": "[parameters('northTrustedAddressStartIP')]",
         "intSubnetPrivateAddress1": "[concat(variables('intSubnetPrivateAddressPrefix'), '.', add(int(variables('IntSubnetStartInt')), 1))]",
         "intSubnetPrivateAddress2": "[concat(variables('intSubnetPrivateAddressPrefix'), '.', add(int(variables('IntSubnetStartInt')), 10))]",
         "intSubnetPrivateAddress3": "[concat(variables('intSubnetPrivateAddressPrefix'), '.', add(int(variables('IntSubnetStartInt')), 11))]",
-        "intSubnetPrivateAddressPrefix": "[substring(parameters('NorthTrustedAddressStartIP'), 0, lastindexOf(parameters('NorthTrustedAddressStartIP'), '.'))]",
-        "intSubnetStartDirty": "[substring(parameters('NorthTrustedAddressStartIP'), lastIndexOf(parameters('NorthTrustedAddressStartIP'), '.'), sub(length(parameters('NorthTrustedAddressStartIP')), lastIndexOf(parameters('NorthTrustedAddressStartIP'), '.') ))]",
+        "intSubnetPrivateAddressPrefix": "[substring(parameters('northTrustedAddressStartIP'), 0, lastindexOf(parameters('northTrustedAddressStartIP'), '.'))]",
+        "intSubnetStartDirty": "[substring(parameters('northTrustedAddressStartIP'), lastIndexOf(parameters('northTrustedAddressStartIP'), '.'), sub(length(parameters('northTrustedAddressStartIP')), lastIndexOf(parameters('northTrustedAddressStartIP'), '.') ))]",
         "intSubnetStartInt": "[replace(variables('intSubnetStartDirty'), '.', '')]",
         "isAcceleratedNetworkingSupported": "[if(not(contains(parameters('bigIpVersion'),  '14.1.200000')), bool('true'), bool('false'))]",
         "jbimageOffer": "UbuntuServer",
@@ -500,7 +500,7 @@
             }
         },
         "jbubuntuOSVersion": "18.04-LTS",
-        "jbvmName": "[concat(variables('dnsLabelPrefix'), '-linux-jump')]",
+        "jbvmName": "[concat(variables('resourcePrefix'), '-lnx-jb')]",
         "jbvmSize": "Standard_A1",
         "linuxConfiguration": {
             "disablePasswordAuthentication": true,
@@ -514,22 +514,20 @@
             }
         },
         "location": "[resourceGroup().location]",
-        "ManagementAddressStartIP": "192.168.1.4",
-        "ManagementAddressSubnet": "192.168.1.0/24",
-        "mgmtNicName": "[concat(variables('dnsLabel'), '-mgmt')]",
-        "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-mgmt-nsg'))]",
+        "mgmtNicName": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-mgmt')]",
+        "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-mgmt-nsg'))]",
         "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]",
         "mgmtSubnetName": "management",
-        "mgmtSubnetPrivateAddress": "[variables('ManagementAddressStartIP')]",
+        "mgmtSubnetPrivateAddress": "[parameters('managementAddressStartIP')]",
         "mgmtSubnetPrivateAddress1": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 5))]",
         "mgmtSubnetPrivateAddress2": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 50))]",
         "mgmtSubnetPrivateAddress3": "[concat(variables('mgmtSubnetPrivateAddressPrefix'), '.',add(int(variables('mgmtSubnetStartInt')), 51))]",
-        "mgmtSubnetPrivateAddressPrefix": "[substring(variables('ManagementAddressStartIP'), 0, lastindexOf(variables('ManagementAddressStartIP'), '.'))]",
-        "mgmtSubnetStartDirty": "[substring(variables('ManagementAddressStartIP'), lastIndexOf(variables('ManagementAddressStartIP'), '.'), sub(length(variables('ManagementAddressStartIP')), lastIndexOf(variables('ManagementAddressStartIP'), '.') ))]",
+        "mgmtSubnetPrivateAddressPrefix": "[substring(parameters('managementAddressStartIP'), 0, lastindexOf(parameters('managementAddressStartIP'), '.'))]",
+        "mgmtSubnetStartDirty": "[substring(parameters('managementAddressStartIP'), lastIndexOf(parameters('managementAddressStartIP'), '.'), sub(length(parameters('managementAddressStartIP')), lastIndexOf(parameters('managementAddressStartIP'), '.') ))]",
         "mgmtSubnetStartInt": "[replace(variables('mgmtSubnetStartDirty'), '.','')]",
+        "newCustomImageName": "[concat(variables('resourcePrefix'), 'image')]",
+        "newDataStorageAccountName": "[concat(uniqueString(variables('resourcePrefix'), resourceGroup().id, deployment().name), 'data000')]",
         "networkApiVersion": "2017-11-01",
-        "newCustomImageName": "[concat(variables('dnsLabelPrefix'), 'image')]",
-        "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]",
         "numberOfExternalIps": "[parameters('numberOfExternalIps')]",
         "offerToUse": "[concat('f5-big-ip-', variables('imageNameArray').offerPostfix[variables('imageNameSub')])]",
         "osProfiles": {
@@ -573,6 +571,7 @@
         ],
         "publicIPAddressType": "Static",
         "resourceGroupName": "[resourceGroup().name]",
+        "resourcePrefix": "[toLower(parameters('resourcePrefix'))]",
         "routeCmd": "route",
         "routeTableName": "BasicUDR",
         "sacaConfig": "[variables('cmdConfigStig')]",
@@ -602,13 +601,14 @@
         "useCustomImage": "[not(empty(variables('customImage')))]",
         "vdmsSubnetName": "VDMS",
         "verifyHash64": "Y2xpIHNjcmlwdCAvQ29tbW9uL3ZlcmlmeUhhc2ggewpwcm9jIHNjcmlwdDo6cnVuIHt9IHsKICAgICAgICBpZiB7W2NhdGNoIHsKICAgICAgICAgICAgc2V0IGhhc2hlcyhhc20tcG9saWN5LWxpbnV4LnRhci5neikgNjNiNWMyYTUxY2EwOWM0M2JkODlhZjM3NzNiYmFiODdjNzFhNmU3ZjZhZDk0MTBiMjI5YjRlMGExYzQ4M2Q0NmYxYTlmZmYzOWQ5OTQ0MDQxYjAyZWU5MjYwNzI0MDI3NDE0ZGU1OTJlOTlmNGMyNDc1NDE1MzIzZTE4YTcyZTAKICAgICAgICAgICAgc2V0IGhhc2hlcyhmNS5odHRwLnYxLjIuMHJjNC50bXBsKSA0N2MxOWE4M2ViZmM3YmQxZTllOWMzNWYzNDI0OTQ1ZWY4Njk0YWE0MzdlZWRkMTdiNmEzODc3ODhkNGRiMTM5NmZlZmU0NDUxOTliNDk3MDY0ZDc2OTY3YjBkNTAyMzgxNTQxOTBjYTBiZDczOTQxMjk4ZmMyNTdkZjRkYzAzNAogICAgICAgICAgICBzZXQgaGFzaGVzKGY1Lmh0dHAudjEuMi4wcmM2LnRtcGwpIDgxMWIxNGJmZmFhYjVlZDAzNjVmMDEwNmJiNWNlNWU0ZWMyMjM4NTY1NWVhM2FjMDRkZTJhMzliZDk5NDRmNTFlMzcxNDYxOWRhZTdjYTQzNjYyYzk1NmI1MjEyMjI4ODU4ZjA1OTI2NzJhMjU3OWQ0YTg3NzY5MTg2ZTJjYmZlCiAgICAgICAgICAgIHNldCBoYXNoZXMoZjUuaHR0cC52MS4yLjByYzcudG1wbCkgMjFmNDEzMzQyZTlhN2EyODFhMGYwZTEzMDFlNzQ1YWE4NmFmMjFhNjk3ZDJlNmZkYzIxZGQyNzk3MzQ5MzY2MzFlOTJmMzRiZjFjMmQyNTA0YzIwMWY1NmNjZDc1YzVjMTNiYWEyZmU3NjUzMjEzNjg5ZWMzYzllMjdkZmY3N2QKICAgICAgICAgICAgc2V0IGhhc2hlcyhmNS5hd3NfYWR2YW5jZWRfaGEudjEuMy4wcmMxLnRtcGwpIDllNTUxNDljMDEwYzFkMzk1YWJkYWUzYzNkMmNiODNlYzEzZDMxZWQzOTQyNDY5NWU4ODY4MGNmM2VkNWEwMTNkNjI2YjMyNjcxMWQzZDQwZWYyZGY0NmI3MmQ0MTRiNGNiOGU0ZjQ0NWVhMDczOGRjYmQyNWM0Yzg0M2FjMzlkCiAgICAgICAgICAgIHNldCBoYXNoZXMoZjUuYXdzX2FkdmFuY2VkX2hhLnYxLjQuMHJjMS50bXBsKSBkZTA2ODQ1NTI1NzQxMmE5NDlmMWVhZGNjYWVlODUwNjM0N2UwNGZkNjliZmI2NDUwMDFiNzZmMjAwMTI3NjY4ZTRhMDZiZTJiYmI5NGUxMGZlZmMyMTVjZmMzNjY1YjA3OTQ1ZTZkNzMzY2JlMWE0ZmExYjg4ZTg4MTU5MDM5NgogICAgICAgICAgICBzZXQgaGFzaGVzKGY1LmF3c19hZHZhbmNlZF9oYS52MS40LjByYzIudG1wbCkgNmFiMGJmZmM0MjZkZjdkMzE5MTNmOWE0NzRiMWEwNzg2MDQzNWUzNjZiMDdkNzdiMzIwNjRhY2ZiMjk1MmMxZjIwN2JlYWVkNzcwMTNhMTVlNDRkODBkNzRmMzI1M2U3Y2Y5ZmJiZTEyYTkwZWM3MTI4ZGU2ZmFjZDA5N2Q2OGYKICAgICAgICAgICAgc2V0IGhhc2hlcyhmNS5hd3NfYWR2YW5jZWRfaGEudjEuNC4wcmMzLnRtcGwpIDJmMjMzOWI0YmMzYTIzYzljZmQ0MmFhZTJhNmRlMzliYTA2NTgzNjZmMjU5ODVkZTJlYTUzNDEwYTc0NWYwZjE4ZWVkYzQ5MWIyMGY0YThkYmE4ZGI0ODk3MDA5NmUyZWZkY2E3YjhlZmZmYTFhODNhNzhlNWFhZGYyMThiMTM0CiAgICAgICAgICAgIHNldCBoYXNoZXMoZjUuYXdzX2FkdmFuY2VkX2hhLnYxLjQuMHJjNC50bXBsKSAyNDE4YWM4YjFmMTg4NGM1YzA5NmNiYWM2YTk0ZDQwNTlhYWFmMDU5MjdhNmE0NTA4ZmQxZjI1YjhjYzYwNzc0OTg4MzlmYmRkYTgxNzZkMmNmMmQyNzRhMjdlNmExZGFlMmExZTNhMGE5OTkxYmM2NWZjNzRmYzBkMDJjZTk2MwogICAgICAgICAgICBzZXQgaGFzaGVzKGY1LmF3c19hZHZhbmNlZF9oYS52MS40LjByYzUudG1wbCkgNWU1ODIxODdhZTFhNjMyM2UwOTVkNDFlZGRkNDExNTFkNmJkMzhlYjgzYzYzNDQxMGQ0NTI3YTNkMGUyNDZhOGZjNjI2ODVhYjA4NDlkZTJhZGU2MmIwMjc1ZjUxMjY0ZDJkZWFjY2JjMTZiNzczNDE3Zjg0N2E0YTFlYTliYzQKICAgICAgICAgICAgc2V0IGhhc2hlcyhhc20tcG9saWN5LnRhci5neikgMmQzOWVjNjBkMDA2ZDA1ZDhhMTU2N2ExZDhhYWU3MjI0MTllOGIwNjJhZDc3ZDZkOWEzMTY1Mjk3MWU1ZTY3YmM0MDQzZDgxNjcxYmEyYThiMTJkZDIyOWVhNDZkMjA1MTQ0Zjc1Mzc0ZWQ0Y2FlNThjZWZhOGY5YWI2NTMzZTYKICAgICAgICAgICAgc2V0IGhhc2hlcyhkZXBsb3lfd2FmLnNoKSAxYTNhM2M2Mjc0YWIwOGE3ZGMyY2I3M2FlZGM4ZDJiMmEyM2NkOWUwZWIwNmEyZTE1MzRiMzYzMmYyNTBmMWQ4OTcwNTZmMjE5ZDViMzVkM2VlZDEyMDcwMjZlODk5ODlmNzU0ODQwZmQ5Mjk2OWM1MTVhZTRkODI5MjE0ZmI3NAogICAgICAgICAgICBzZXQgaGFzaGVzKGY1LnBvbGljeV9jcmVhdG9yLnRtcGwpIDA2NTM5ZTA4ZDExNWVmYWZlNTVhYTUwN2VjYjRlNDQzZTgzYmRiMWY1ODI1YTk1MTQ5NTRlZjZjYTU2ZDI0MGVkMDBjN2I1ZDY3YmQ4ZjY3YjgxNWVlOWRkNDY0NTE5ODQ3MDFkMDU4Yzg5ZGFlMjQzNGM4OTcxNWQzNzVhNjIwCgogICAgICAgICAgICBzZXQgZmlsZV9wYXRoIFtsaW5kZXggJHRtc2g6OmFyZ3YgMV0KICAgICAgICAgICAgc2V0IGZpbGVfbmFtZSBbZmlsZSB0YWlsICRmaWxlX3BhdGhdCgogICAgICAgICAgICBpZiB7IVtpbmZvIGV4aXN0cyBoYXNoZXMoJGZpbGVfbmFtZSldfSB7CiAgICAgICAgICAgICAgICB0bXNoOjpsb2cgZXJyICJObyBoYXNoIGZvdW5kIGZvciAkZmlsZV9uYW1lIgogICAgICAgICAgICAgICAgZXhpdCAxCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHNldCBleHBlY3RlZF9oYXNoICRoYXNoZXMoJGZpbGVfbmFtZSkKICAgICAgICAgICAgc2V0IGNvbXB1dGVkX2hhc2ggW2xpbmRleCBbZXhlYyAvdXNyL2Jpbi9vcGVuc3NsIGRnc3QgLXIgLXNoYTUxMiAkZmlsZV9wYXRoXSAwXQogICAgICAgICAgICBpZiB7ICRleHBlY3RlZF9oYXNoIGVxICRjb21wdXRlZF9oYXNoIH0gewogICAgICAgICAgICAgICAgZXhpdCAwCiAgICAgICAgICAgIH0KICAgICAgICAgICAgdG1zaDo6bG9nIGVyciAiSGFzaCBkb2VzIG5vdCBtYXRjaCBmb3IgJGZpbGVfcGF0aCIKICAgICAgICAgICAgZXhpdCAxCiAgICAgICAgfV19IHsKICAgICAgICAgICAgdG1zaDo6bG9nIGVyciB7VW5leHBlY3RlZCBlcnJvciBpbiB2ZXJpZnlIYXNofQogICAgICAgICAgICBleGl0IDEKICAgICAgICB9CiAgICB9Cn0=",
-        "virtualNetworkName": "[concat(variables('dnsLabelPrefix'), '-scca-vnet')]",
+        "virtualNetworkName": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-vnet')]",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "windowsOSVersion": "2019-Datacenter",
-        "WinvmName": "[concat(variables('dnsLabelPrefix'), '-win-jb')]"
+        "WinvmName": "[concat(variables('resourcePrefix'), '-win-jb')]"
     },
     "resources": [
         {
+            "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "[variables('networkApiVersion')]",
             "sku": {
                 "name": "Standard"
@@ -622,15 +622,15 @@
             "name": "[concat(variables('extPublicIPAddressNamePrefix'), copyIndex())]",
             "properties": {
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(variables('dnsLabel'), copyIndex(0))]"
+                    "domainNameLabel": "[concat(variables('dnsHostnamePrefix'), copyIndex(0))]"
                 },
                 "idleTimeoutInMinutes": 30,
                 "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/publicIPAddresses"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/routeTables",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[variables('location')]",
             "name": "[variables('routeTableName')]",
@@ -645,10 +645,10 @@
                         }
                     }
                 ]
-            },
-            "type": "Microsoft.Network/routeTables"
+            }
         },
         {
+            "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('routeTableName')]"
@@ -658,29 +658,30 @@
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "[parameters('NorthUntrustedAddressSubnet')]",
-                        "[parameters('NorthTrustedAddressSubnet')]",
-                        "[variables('ManagementAddressSubnet')]",
-                        "[parameters('VDMSAddressSubnet')]"
+                        "[parameters('northUntrustedAddressSubnet')]",
+                        "[parameters('northTrustedAddressSubnet')]",
+                        "[parameters('managementAddressSubnet')]",
+                        "[parameters('VDMSAddressSubnet')]",
+                        "[parameters('gatewayAddressSubnet')]"                        
                     ]
                 },
                 "subnets": [
                     {
                         "name": "[variables('mgmtSubnetName')]",
                         "properties": {
-                            "addressPrefix": "[variables('ManagementAddressSubnet')]"
+                            "addressPrefix": "[parameters('managementAddressSubnet')]"
                         }
                     },
                     {
                         "name": "[variables('extSubnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('NorthUntrustedAddressSubnet')]"
+                            "addressPrefix": "[parameters('northUntrustedAddressSubnet')]"
                         }
                     },
                     {
                         "name": "[variables('intSubnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('NorthTrustedAddressSubnet')]"
+                            "addressPrefix": "[parameters('northTrustedAddressSubnet')]"
                         }
                     },
                     {
@@ -691,13 +692,19 @@
                                 "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableName'))]"
                             }
                         }
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "properties": {
+                            "addressPrefix": "[parameters('gatewayAddressSubnet')]"
+                        }
                     }
                 ]
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/virtualNetworks"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
@@ -709,7 +716,7 @@
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-mgmt-ipconfig')]",
                         "properties": {
                             "loadBalancerBackendAddressPools": [
                                 {
@@ -728,10 +735,10 @@
                     "id": "[variables('mgmtNsgID')]"
                 }
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
@@ -743,7 +750,7 @@
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabel'), '-mgmt-ipconfig')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-mgmt-ipconfig')]",
                         "properties": {
                             "loadBalancerBackendAddressPools": [
                                 {
@@ -762,10 +769,10 @@
                     "id": "[variables('mgmtNsgID')]"
                 }
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
-                {
+        {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
@@ -776,7 +783,7 @@
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabelPrefix'), '-mgmt-ipconfig')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-mgmt-ipconfig')]",
                         "properties": {
                             "privateIPAddress": "[variables('mgmtSubnetPrivateAddress2')]",
                             "privateIPAllocationMethod": "Static",
@@ -790,10 +797,10 @@
                     "id": "[variables('mgmtNsgID')]"
                 }
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('vnetId')]",
@@ -804,7 +811,7 @@
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabelPrefix'), '-mgmt-ipconfig0')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-mgmt-ipconfig0')]",
                         "properties": {
                             "privateIPAddress": "[variables('mgmtSubnetPrivateAddress3')]",
                             "privateIPAllocationMethod": "Static",
@@ -818,21 +825,20 @@
                     "id": "[variables('mgmtNsgID')]"
                 }
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
+                "[variables('extLbId')]",
                 "[variables('vnetId')]",
-                "[variables('extNsgID')]",
                 "extpipcopy",
-                "[variables('extLbId')]"
+                "[variables('extNsgId')]"
             ],
             "location": "[variables('location')]",
             "name": "[concat(variables('extNicName'), '0')]",
             "properties": {
-                "enableAcceleratedNetworking": "[variables('isAcceleratedNetworkingSupported')]",
                 "ipConfigurations": [
                     {
                         "name": "[concat(variables('instanceName'), '-self-ipconfig')]",
@@ -850,33 +856,33 @@
                         "properties": {
                             "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]",
                             "primary": false,
-                            "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), '.',10)]",
                             "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), '.', 10)]",
                             "subnet": {
                                 "id": "[variables('extSubnetId')]"
                             }
                         }
                     }
                 ],
+                "enableAcceleratedNetworking": "[variables('isAcceleratedNetworkingSupported')]",
                 "networkSecurityGroup": {
                     "id": "[concat(variables('extNsgId'))]"
                 }
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), union(variables('tagValues'),variables('failovertagValues')))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), union(variables('tagValues'),variables('failovertagValues')))]"
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
+                "[variables('extLbId')]",
                 "[variables('vnetId')]",
-                "[variables('extNsgID')]",
                 "extpipcopy",
-                "[variables('extLbId')]"
+                "[variables('extNsgId')]"
             ],
             "location": "[variables('location')]",
             "name": "[concat(variables('extNicName'), '1')]",
             "properties": {
-                "enableAcceleratedNetworking": "[variables('isAcceleratedNetworkingSupported')]",
                 "ipConfigurations": [
                     {
                         "name": "[concat(variables('instanceName'), '-self-ipconfig')]",
@@ -894,22 +900,23 @@
                         "properties": {
                             "loadBalancerBackendAddressPools": "[if(equals(variables('numberOfExternalIps'), 0), take(variables('backEndAddressPoolArray'), 0), take(variables('backEndAddressPoolArray'), 1))]",
                             "primary": false,
-                            "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), '.', 11)]",
                             "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(variables('extSubnetPrivateAddressPrefix'), '.', 11)]",
                             "subnet": {
                                 "id": "[variables('extSubnetId')]"
                             }
                         }
                     }
                 ],
+                "enableAcceleratedNetworking": "[variables('isAcceleratedNetworkingSupported')]",
                 "networkSecurityGroup": {
                     "id": "[concat(variables('extNsgId'))]"
                 }
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), union(variables('tagValues'),variables('failovertagValues')))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), union(variables('tagValues'),variables('failovertagValues')))]"
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('intLbId')]",
@@ -925,7 +932,7 @@
                 "enableAcceleratedNetworking": "[variables('isAcceleratedNetworkingSupported')]",
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabel'), '-int-ipconfig')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-int-ipconfig')]",
                         "properties": {
                             "primary": true,
                             "privateIPAddress": "[variables('intSubnetPrivateAddress')]",
@@ -936,7 +943,7 @@
                         }
                     },
                     {
-                        "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-int-ipconfig-secondary')]",
                         "properties": {
                             "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), skip(variables('backEndAddressPoolArray'), 1))]",
                             "privateIPAddress": "[variables('intSubnetPrivateAddress2')]",
@@ -948,10 +955,10 @@
                     }
                 ]
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[variables('networkApiVersion')]",
             "dependsOn": [
                 "[variables('intLbId')]",
@@ -967,7 +974,7 @@
                 "enableAcceleratedNetworking": "[variables('isAcceleratedNetworkingSupported')]",
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('dnsLabel'), '-int-ipconfig')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-int-ipconfig')]",
                         "properties": {
                             "primary": true,
                             "privateIPAddress": "[variables('intSubnetPrivateAddress1')]",
@@ -978,7 +985,7 @@
                         }
                     },
                     {
-                        "name": "[concat(variables('dnsLabel'), '-int-ipconfig-secondary')]",
+                        "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-int-ipconfig-secondary')]",
                         "properties": {
                             "loadBalancerBackendAddressPools": "[if(equals(parameters('internalLoadBalancerType'), 'DO_NOT_USE'), take(variables('backEndAddressPoolArray'), 0), skip(variables('backEndAddressPoolArray'), 1))]",
                             "privateIPAddress": "[variables('intSubnetPrivateAddress3')]",
@@ -990,13 +997,13 @@
                     }
                 ]
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkInterfaces"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[variables('location')]",
-            "name": "[concat(variables('dnsLabelPrefix'), '-mgmt-nsg')]",
+            "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-mgmt-nsg')]",
             "properties": {
                 "securityRules": [
                     {
@@ -1015,13 +1022,13 @@
                     }
                 ]
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkSecurityGroups"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[variables('location')]",
-            "name": "[concat(variables('dnsLabel'), '-ext-nsg')]",
+            "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-ext-nsg')]",
             "properties": {
                 "securityRules": [
                     {
@@ -1054,10 +1061,10 @@
                     }
                 ]
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Network/networkSecurityGroups"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Network/loadBalancers",
             "apiVersion": "[variables('networkApiVersion')]",
             "condition": "[not(equals(variables('numberOfExternalIps'),0))]",
             "dependsOn": [
@@ -1191,10 +1198,10 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "sku": {
                 "name": "Standard"
-            },
-            "type": "Microsoft.Network/loadBalancers"
+            }
         },
         {
+            "type": "Microsoft.Network/loadBalancers",
             "apiVersion": "[variables('networkApiVersion')]",
             "condition": "[not(equals(parameters('internalLoadBalancerType'),'DO_NOT_USE'))]",
             "dependsOn": [
@@ -1259,10 +1266,10 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "sku": {
                 "name": "Standard"
-            },
-            "type": "Microsoft.Network/loadBalancers"
+            }
         },
         {
+            "type": "Microsoft.Compute/availabilitySets",
             "apiVersion": "[variables('computeApiVersion')]",
             "location": "[variables('location')]",
             "name": "[variables('availabilitySetName')]",
@@ -1273,10 +1280,10 @@
                 "PlatformFaultDomainCount": 2,
                 "PlatformUpdateDomainCount": 2
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/availabilitySets"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Compute/availabilitySets",
             "apiVersion": "[variables('computeApiVersion')]",
             "location": "[variables('location')]",
             "name": "[variables('availabilitySet2Name')]",
@@ -1287,10 +1294,10 @@
             "sku": {
                 "name": "Aligned"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/availabilitySets"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Compute/availabilitySets",
             "apiVersion": "[variables('computeApiVersion')]",
             "location": "[variables('location')]",
             "name": "[variables('availabilitySet3Name')]",
@@ -1301,10 +1308,10 @@
             "sku": {
                 "name": "Aligned"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/availabilitySets"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "[variables('storageApiVersion')]",
             "kind": "Storage",
             "location": "[variables('location')]",
@@ -1316,10 +1323,10 @@
                 "name": "[variables('dataStorageAccountType')]",
                 "tier": "Standard"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Storage/storageAccounts"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Compute/images",
             "apiVersion": "[variables('computeApiVersion')]",
             "condition": "[and(variables('useCustomImage'), variables('createNewCustomImage'))]",
             "location": "[variables('location')]",
@@ -1334,10 +1341,10 @@
                     }
                 }
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/images"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
@@ -1348,7 +1355,7 @@
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '0')]"
             ],
             "location": "[variables('location')]",
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0')]",
+            "name": "[concat(variables('resourcePrefix'), '-nva-', variables('instanceName'), '0')]",
             "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
             "properties": {
                 "availabilitySet": "[variables('availabilitySetId')]",
@@ -1386,10 +1393,10 @@
                 "osProfile": "[variables('osProfiles')[parameters('authenticationType')]]",
                 "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/virtualMachines"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
@@ -1400,7 +1407,7 @@
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'), '1')]"
             ],
             "location": "[variables('location')]",
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1')]",
+            "name": "[concat(variables('resourcePrefix'), '-nva-', variables('instanceName'), '1')]",
             "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
             "properties": {
                 "availabilitySet": "[variables('availabilitySetId')]",
@@ -1438,17 +1445,17 @@
                 "osProfile": "[variables('osProfiles')[parameters('authenticationType')]]",
                 "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/virtualMachines"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2018-10-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
                 "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('mgmtNicName'), '2'))]"
             ],
             "location": "[variables('location')]",
-            "name": "[variables('jbvmName')]",
+            "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-lnx-jb')]",
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySet2Name'))]"
@@ -1493,17 +1500,17 @@
                         "createOption": "FromImage"
                     }
                 }
-            },
-            "type": "Microsoft.Compute/virtualMachines"
+            }
         },
         {
+            "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2018-10-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
                 "[resourceId('Microsoft.Network/networkInterfaces/', concat(variables('mgmtNicName'), '3'))]"
             ],
             "location": "[variables('location')]",
-            "name": "[variables('WinvmName')]",
+            "name": "[concat(variables('resourcePrefix'), '-', take(uniqueString(resourceGroup().id),4), '-win-jb')]",
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySet3Name'))]"
@@ -1547,16 +1554,16 @@
                         "createOption": "FromImage"
                     }
                 }
-            },
-            "type": "Microsoft.Compute/virtualMachines"
+            }
         },
         {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '0')]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('resourcePrefix'), '-nva-', variables('instanceName'), '0')]"
             ],
             "location": "[variables('location')]",
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '0/start')]",
+            "name": "[concat(variables('resourcePrefix'), '-nva-', variables('instanceName'), '0/start')]",
             "properties": {
                 "autoUpgradeMinorVersion": "true",
                 "protectedSettings": {
@@ -1577,16 +1584,16 @@
                 "type": "CustomScript",
                 "typeHandlerVersion": "2.0"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/virtualMachines/extensions"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         },
         {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'), '-', variables('instanceName'), '1')]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('resourcePrefix'), '-nva-', variables('instanceName'), '1')]"
             ],
             "location": "[variables('location')]",
-            "name": "[concat(variables('dnsLabel'), '-', variables('instanceName'), '1/start')]",
+            "name": "[concat(variables('resourcePrefix'), '-nva-', variables('instanceName'), '1/start')]",
             "properties": {
                 "autoUpgradeMinorVersion": "true",
                 "protectedSettings": {
@@ -1605,8 +1612,17 @@
                 "type": "CustomScript",
                 "typeHandlerVersion": "2.0"
             },
-            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
-            "type": "Microsoft.Compute/virtualMachines/extensions"
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]"
         }
-    ]
+    ],
+    "outputs": {
+        "RDP-URL": {
+            "type": "string",
+            "value": "[concat('rdp://',reference(concat(variables('extPublicIPAddressNamePrefix'), '0')).dnsSettings.fqdn)]"
+        },
+        "SSH-URL": {
+            "type": "string",
+            "value": "[concat('ssh://', parameters('adminUsername'), '@', reference(concat(variables('extPublicIPAddressNamePrefix'), '0')).dnsSettings.fqdn)]"
+        }
+    }
 }
