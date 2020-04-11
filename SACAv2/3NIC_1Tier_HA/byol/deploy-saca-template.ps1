@@ -130,8 +130,9 @@ else
       $f5BigIqPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqPwdSecret).SecretValueText -AsPlainText -Force
     }
 
-# Test template
-Test-AzResourceGroupDeployment -ResourceGroupName $rgName `
+# Deploy template
+$deploy = New-AzResourceGroupDeployment -ResourceGroupName $rgName `
+    -Name $deploymentName `
     -TemplateFile "$PSScriptRoot\azureDeploy.json" `
     -TemplateParameterFile "$PSScriptRoot\deploymentParameters.json" `
     -adminPasswordOrKey $adminUserPwd `

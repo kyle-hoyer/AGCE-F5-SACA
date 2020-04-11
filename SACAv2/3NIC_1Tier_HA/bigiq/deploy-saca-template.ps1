@@ -126,9 +126,9 @@ if($null -eq $kv)
     }
 else
     {
-      $adminUsername = (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminSecret).SecretValueText
+      $adminUsername = ConvertTo-SecureString (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminSecret).SecretValueText -AsPlainText -Force
       $adminUserPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminPwdSecret).SecretValueText -AsPlainText -Force
-      $f5BigIqUsername = (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqUsernameSecret).SecretValueText
+      $f5BigIqUsername = ConvertTo-SecureString (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqUsernameSecret).SecretValueText -AsPlainText -Force
       $f5BigIqPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqPwdSecret).SecretValueText -AsPlainText -Force
     }
 

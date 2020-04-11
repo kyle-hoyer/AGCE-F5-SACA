@@ -1,0 +1,90 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "allowUsageAnalytics": {
+        "value": "Yes"
+      },
+      "authenticationType": {
+        "value": "password"
+      },
+      "bigIpModules": {
+        "value": "ltm:nominal,asm:nominal,afm:nominal"
+      },
+      "bigIpVersion": {
+        "value": "14.1.200000"
+      },
+      "bigIqAddress": {
+        "value": "52.227.168.232"
+      },
+      "bigIqLicensePoolName": {
+        "value": "Pool"
+      },
+      "customImage": {
+        "value": "OPTIONAL"
+      },
+      "declarationUrl": {
+        "value": "https://raw.githubusercontent.com/Phydeauxman/f5-azure-saca/master/SACAv2/AS3/paygsccaBaseline.json"
+      },
+      "enableNetworkFailover": {
+        "value": "Yes"
+      },
+      "gatewayAddressSubnet": {
+        "value": "10.3.0.0/24"
+      },
+      "instanceName": {
+        "value": "age2etst"
+      },
+      "instanceType": {
+        "value": "Standard_DS4_v2"
+      },
+      "internalLoadBalancerProbePort": {
+          "value": "3456"
+      },
+      "internalLoadBalancerType": {
+        "value": "Per-protocol"
+      },
+      "managementAddressSubnet": {
+        "value": "10.3.4.0/24"
+      },
+      "managementAddressStartIP": {
+        "value": "10.3.4.4"
+      },
+      "northTrustedAddressStartIP": {
+        "value": "10.3.3.4"
+      },
+      "northTrustedAddressSubnet": {
+        "value": "10.3.3.0/24"
+      },
+      "northUntrustedAddressStartIP": {
+        "value": "10.3.2.4"
+      },
+      "northUntrustedAddressSubnet": {
+        "value": "10.3.2.0/24"
+      },
+      "ntpServer": {
+        "value": "0.pool.ntp.org"
+      },
+      "restrictedSrcAddress": {
+        "value": "*"
+      },
+      "stigDevice": {
+        "value": true
+      },
+      "tagValues": {
+        "value": {
+            "application": "APP",
+            "cost": "COST",
+            "environment": "ENV",
+            "group": "GROUP",
+            "owner": "OWNER"
+        }
+      },
+      "timeZone": {
+        "value": "UTC"
+      },
+      "vdmsAddressSubnet": {
+          "value": "10.3.1.0/24"
+      }
+  }
+}
