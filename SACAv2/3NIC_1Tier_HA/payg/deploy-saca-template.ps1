@@ -31,8 +31,26 @@ $kvName = "$deploymentPrefix-kv"
 $sacaAdminSecret = 'saca-admin-username'
 $sacaAdminPwdSecret = 'saca-admin-password'
 $deploymentName = $deploymentPrefix + "_" + (Get-Date -Format HHmmMMddyyyy)
-$pubName = 'f5-networks'
-$offerName = 'f5-big-ip-byol'
+$f5Options = @(
+    'AdvancedWAF1Gbps', `
+    'AdvancedWAF200Mbps',`
+    'AdvancedWAF25Mbps',`
+    'Good1Gbps',`
+    'Good10Gbps',`
+    'Good200Mbps',`
+    'Good25Mbps',`
+    'Better1Gbps',`
+    'Better10Gbps',`
+    'Better200Mbps',`
+    'Better25Mbps',`
+    'Best1Gbps',`
+    'Best10Gbps',`
+    'Best200Mbps',`
+    'Best25Mbps',`
+    'PerAppVeAdvancedWAF200Mbps',`
+    'PerAppVeAdvancedWAF25Mbps',`
+    'PerAppVeLTM200Mbps',`
+    'PerAppVeLTM25Mbps')
 
 # Login to Azure
 Write-Host "Checking context...";
@@ -50,25 +68,6 @@ if($null -ne $context){
 else{
   Login-AzAccount -EnvironmentName $environmentName -TenantId $tenantId -Subscription $subscriptionId
   }
-
-# Accept license terms
-$skus = Get-AzVMImageSku `
-    -Location $location `
-    -PublisherName $pubName `
-    -Offer $offerName
-
-foreach($sku in $skus)
-    {
-        $terms = Get-AzMarketplaceTerms `
-            -Publisher $pubName `
-            -Product $sku.offer `
-            -Name $sku.skus
-        
-        if(!($terms.Accepted))
-            {
-                $terms | Set-AzMarketplaceTerms -Accept
-            }
-    }
 
 # Validate region value entered
 $regions = @(get-azlocation | Select-Object -ExpandProperty Location)
@@ -88,6 +87,19 @@ if(!($regions.Contains($location)))
             }
         Until
             ($regions.Contains($location))
+    }
+
+# Accept license terms
+$mpOfferings = (Get-Content "$PSScriptRoot\marketplaceOfferings.json") | ConvertFrom-Json
+$imageName = $f5Options | ogv -Title "Choose the F5 SKU to deploy" -PassThru
+$terms = Get-AzMarketplaceTerms `
+    -Publisher f5-networks `
+    -Product $mpOfferings.paygImage.$imageName.offer `
+    -Name $mpOfferings.paygImage.$imageName.sku
+
+if(!($terms.Accepted))
+    {
+        $terms | Set-AzMarketplaceTerms -Accept
     }
 
 # Create Resource Group
@@ -132,8 +144,8 @@ $deploy = New-AzResourceGroupDeployment -ResourceGroupName $rgName `
     -adminPasswordOrKey $adminUserPwd `
     -adminUsername $adminUsername `
     -instanceName $instanceName `
+    -offerToUse $mpOfferings.paygImage.$imageName.offer `
+    -skuToUse $mpOfferings.paygImage.$imageName.sku `
     -WindowsAdminPassword $adminUserPwd `
-    -licenseKey1 $licenseKey1 `
-    -licenseKey2 $licenseKey2 `
     -Mode Incremental `
     -Verbose

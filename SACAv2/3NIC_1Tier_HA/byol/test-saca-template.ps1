@@ -115,19 +115,13 @@ if($null -eq $kv)
             -EnabledForTemplateDeployment
       $adminUsername = ConvertTo-SecureString (Read-Host "Enter name of Admin User for Windows and Linux VMs") -AsPlainText -Force
       $adminUserPwd = New-RandomComplexPassword
-      $f5BigIqUsername = ConvertTo-SecureString (Read-Host "Enter name of BIG-IQ Admin User") -AsPlainText -Force
-      $f5BigIqPwd = ConvertTo-SecureString (Read-Host "Enter the password for the BIG-IQ Admin User") -AsPlainText -Force
       Set-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminSecret -SecretValue $adminUsername
-      Set-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqUsernameSecret -SecretValue $f5BigIqUsername
       Set-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminPwdSecret -SecretValue $adminUserPwd
-      Set-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqPwdSecret -SecretValue $f5BigIqPwd
     }
 else
     {
       $adminUsername = ConvertTo-SecureString (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminSecret).SecretValueText -AsPlainText -Force
       $adminUserPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $sacaAdminPwdSecret).SecretValueText -AsPlainText -Force
-      $f5BigIqUsername = ConvertTo-SecureString (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqUsernameSecret).SecretValueText -AsPlainText -Force
-      $f5BigIqPwd = ConvertTo-SecureString -String (Get-AzKeyVaultSecret -VaultName $kvName -Name $f5BigIqPwdSecret).SecretValueText -AsPlainText -Force
     }
 
 # Test template
